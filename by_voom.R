@@ -1,5 +1,5 @@
 #manually enter paths, files, file attributes etc
-file.index <- file.path("C:\\File\\Path\\Here", "filename.txt") #sequence conts
+file.index <- file.path("C:\\File\\Path\\Here", "filename.csv") #sequence counts
 experiment <- data.frame(sample=c("BF1","BF2","AF1","AF2","BM1","BM2","AM1","AM2"), group=rep(rep(c("Before","After"),each=2),2), gender=rep(c("Female","Male"), each=4))
 experiment$group <- relevel(as.factor(experiment$group), ref="Before")
 experiment$gender <- relevel(as.factor(experiment$gender), ref="Female")
@@ -8,7 +8,7 @@ colnames(design) <- c("Int","BvsA","MvsF","GroupVGender")
 design.group.size <- 2 #no. of samples in comparison group eg GroupVGender
 low.count.threshold <- 1 #no. of counts per million that a gene is required to have per sample to stay in this analysis
 
-#read input data
+#load input data
 counts.dat <- read.csv(file.index, row.names=1)
 
 #remove sequences with too many low counts
