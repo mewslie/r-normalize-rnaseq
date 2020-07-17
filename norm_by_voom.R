@@ -27,7 +27,7 @@ counts.dge <- calcNormFactors(counts.dge, method = "TMM")
 counts.dge$samples$norm.factors <- calcNormFactors("other.counts.table.here", lib.size = counts.dge$samples$lib.size, method = "TMM")
 counts.norm <- voom(counts.dge, design, plot = FALSE, normalize.method = "none")
 ###graph counts on MDS plot###
-plotMDS(counts.dge)
+plotMDS(counts.dge, col = as.numeric(experiment$group))
 ###graph before and after norm factor calculation###
 par(mfrow=c(1,2))
 plot.col <- 10 #column of count data to plot
