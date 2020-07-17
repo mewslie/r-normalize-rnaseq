@@ -13,7 +13,7 @@ counts.dat <- read.csv(file.index, row.names = 1)
 
 #remove sequences with too many low counts
 library("edgeR")
-keep <- rowSums(cpm(counts.dat) > low.count.threshold) > =design.group.size; table(keep)
+keep <- rowSums(cpm(counts.dat) > low.count.threshold) >= design.group.size; table(keep)
 counts.keep <- counts.dat[keep,]
 ###graph counts.keep###
 counts.keep.lcpm <- cpm(counts.keep, log = TRUE)
