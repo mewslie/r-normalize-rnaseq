@@ -7,6 +7,10 @@ design <- model.matrix(~ experiment$group * experiment$gender) #last factor ente
 colnames(design) <- c("Int","BvsA","MvsF","GroupVGender")
 design.group.size <- 2 #no. of samples in comparison group eg GroupVGender
 low.count.threshold <- 1 #no. of counts per million that a gene is required to have per sample to stay in this analysis
+###graph design###
+library("rafalib")
+imagemat(design, main = "Model matrix for linear model with interactions", ylab = "Samples", xlab = "Contrasts", xaxt = "n", yaxt = "n")
+axis(2, at = 1:nrow(experiment), labels = experiment$SampleName)
 
 #load input data
 counts.dat <- read.csv(file.index, row.names = 1)
