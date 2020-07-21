@@ -38,6 +38,8 @@ boxplot(assay(counts.vsd), main = "VST Default normalized")
 abline(h = median(assay(counts.vsd)), col = "red")
 boxplot(assay(counts.rld), main = "Rlog Default normalized")
 abline(h = median(assay(counts.rld)), col = "red")
+###graph PCA of samples###
+plotPCA(counts.norm, intgroup=c("group", "gender"))
 
 #write the counts to file
 write.csv(counts.log, "log2_not_normalized.csv")
