@@ -17,26 +17,28 @@ counts.des$Prep <- relevel(counts.des$gender, "Female") #make sure baseline is F
 keep <- rowSums(counts(counts.des) > low.count.threshold) >= design.group.size; table(keep)
 counts.des <- counts.des[keep,]
 ###graph counts.keep###
-counts.log <- normTransform(counts.des)
-boxplot(assay(counts.log), xlab="", ylab="Log2(count+1)", las=2, outline=FALSE, main="logC\n(unnormalised counts)")
-abline(h=median(assay(counts.log)), col="blue") #mark median log
+counts.log <- log2(counts(counts.des, normalized = FALSE)+1)
+boxplot(assay(counts.log), xlab = "", ylab = "Log2(count+1)", las = 2, outline = FALSE, main = "logC\n(unnormalised counts)")
+abline(h = median(assay(counts.log)), col = "blue") #mark median log
 
-#use calcNormFactors and voom on counts.keep
-counts.dge <- DGEList(counts.keep)
-counts.dge <- calcNormFactors(counts.dge, method = "TMM")
-#if there is another count table to normalize on eg spike-in sequences, manually change samples$norm.factors
-counts.dge$samples$norm.factors <- calcNormFactors("other.counts.table.here", lib.size = counts.dge$samples$lib.size, method = "TMM")
-counts.norm <- voom(counts.dge, design, plot = FALSE, normalize.method = "none")
-###graph counts on MDS plot###
-plotMDS(counts.dge, col = as.numeric(experiment$group))
+#use estimateSizeFactors on counts.des
+counts.des <- estimateSizeFactors(counts.des)
+#if there is another count table to normalize on eg spike-in sequences, manually change sizeFactors(counts.des)
+sizeFactors(counts.des) <- sizeFactors("other.deseq2.object.here")
 ###graph before and after norm factor calculation###
-par(mfrow=c(1,2))
-plot.col <- 10 #column of count data to plot
-plotMD(cpm(counts.dge, log = TRUE, prior.count = 0.5, normalized.lib.sizes = FALSE), column = plot.col, main = "Unnormalized")
-abline(h = 0, col = "grey")
-plotMD(counts.norm$E, column = plot.col, main = "Normalized")
-abline(h = 0, col = "grey")
+counts.norm <- normTransform(counts.des) #default normalized=T, log2
+counts.vsd <- vst(counts.des, blind=FALSE) #variance stabilizing transformation
+counts.rld <- rlog(counts.des, blind=FALSE) #regularized logarithm
+par(mfrow = c(1,4))
+boxplot(counts.log, main = "Log2 unnormalized")
+abline(h = median(counts.log), col = "red")
+boxplot(assay(counts.norm), main = "Log2 Default normalized")
+abline(h = median(assay(counts.norm)), col = "red")
+boxplot(assay(counts.vsd), main = "VST Default normalized")
+abline(h = median(assay(counts.vsd)), col = "red")
+boxplot(assay(counts.rld), main = "Rlog Default normalized")
+abline(h = median(assay(counts.rld)), col = "red")
 
 #write the counts to file
-write.csv(cpm(counts.dge, log = T, prior.count = 0.5), "logcpm_not_normalized.csv")
-write.csv(counts.norm$E, "logcpm_normalized.csv")
+write.csv(counts.log, "log2_not_normalized.csv")
+write.csv(assay(counts.norm), "log2_normalized.csv")
