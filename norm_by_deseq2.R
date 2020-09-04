@@ -10,8 +10,8 @@ counts.dat <- read.csv(file.index, row.names = 1)
 #make DESeq2 object
 library("DESeq2")
 counts.des <- DESeqDataSetFromMatrix(counts.dat, experiment, ~ group + gender + group:gender)
-counts.des$Group <- relevel(counts.des$group, "Before") #make sure baseline is control/before
-counts.des$Prep <- relevel(counts.des$gender, "Female") #make sure baseline is Female
+counts.des$group <- relevel(counts.des$group, "Before") #make sure baseline is control/before
+counts.des$gender <- relevel(counts.des$gender, "Female") #make sure baseline is Female
 
 #remove sequences with too many low counts
 keep <- rowSums(counts(counts.des) > low.count.threshold) >= design.group.size; table(keep)
@@ -25,6 +25,8 @@ abline(h = median(assay(counts.log)), col = "blue") #mark median log
 counts.des <- estimateSizeFactors(counts.des)
 #if there is another count table to normalize on eg spike-in sequences, manually change sizeFactors(counts.des)
 sizeFactors(counts.des) <- sizeFactors("other.deseq2.object.here")
+#use estimateDispersions on counts.des
+counts.des <- estimateDispersions(counts.des, fitType="local")
 ###graph before and after norm factor calculation###
 counts.norm <- normTransform(counts.des) #default normalized=T, log2
 counts.vsd <- vst(counts.des, blind=FALSE) #variance stabilizing transformation
@@ -40,6 +42,11 @@ boxplot(assay(counts.rld), main = "Rlog Default normalized")
 abline(h = median(assay(counts.rld)), col = "red")
 ###graph PCA of samples###
 plotPCA(counts.norm, intgroup=c("group", "gender"))
+###graph heatmap###
+library("pheatmap")
+heatmap.genes <- 20
+pheatmap(assay(counts.norm)[sample(nrow(counts(counts.des)), heatmap.genes),],
+         cluster_rows = FALSE, show_rownames = FALSE, cluster_cols = FALSE, annotation_col = as.data.frame(colData(counts.des)[,c("group","gender")]))
 
 #write the counts to file
 write.csv(counts.log, "log2_not_normalized.csv")
