@@ -5,7 +5,6 @@ experiment$group <- relevel(as.factor(experiment$group), ref = "Before")
 experiment$gender <- relevel(as.factor(experiment$gender), ref = "Female")
 design <- model.matrix(~ experiment$group * experiment$gender) #last factor entered in the formula should be the main factor of interest
 colnames(design) <- c("Int","BvsA","MvsF","GroupVGender")
-design.group.size <- 2 #no. of samples in comparison group eg GroupVGender
 low.count.threshold <- 1 #no. of counts per million that a gene is required to have per sample to stay in this analysis
 ###graph design###
 library("rafalib")
@@ -17,15 +16,15 @@ counts.dat <- read.csv(file.index, row.names = 1)
 
 #remove sequences with too many low counts
 library("edgeR")
-keep <- rowSums(cpm(counts.dat) > low.count.threshold) >= design.group.size; table(keep)
-counts.keep <- counts.dat[keep,]
+counts.dge <- DGEList(counts.dat, group = paste(experiment$group, experiment$gender, sep = "."))
+counts.keep <- filterByExpr(counts.dge, design, min.count = low.count.threshold)
+counts.dge <- counts.dge[counts.keep, , keep.lib.sizes = FALSE]
 ###graph counts.keep###
-counts.keep.lcpm <- cpm(counts.keep, log = TRUE)
+counts.keep.lcpm <- cpm(counts.dge, log = TRUE)
 boxplot(counts.keep.lcpm, xlab = "", ylab = "Log2 counts per million (CPM)", las = 2, outline = FALSE, main = "logCPM (unnormalised counts)")
 abline(h = median(counts.keep.lcpm), col = "blue") #mark median logCPM
 
 #use calcNormFactors and voom on counts.keep
-counts.dge <- DGEList(counts.keep)
 counts.dge <- calcNormFactors(counts.dge, method = "TMM")
 #if there is another count table to normalize on eg spike-in sequences, manually change samples$norm.factors
 counts.dge$samples$norm.factors <- calcNormFactors("other.counts.table.here", lib.size = counts.dge$samples$lib.size, method = "TMM")
