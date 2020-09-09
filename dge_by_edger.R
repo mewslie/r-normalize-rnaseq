@@ -12,7 +12,7 @@ annot.dat <- read.csv(annots.index)
 
 # run glmQLFit on counts.dge
 counts.dge <- glmQLFit(counts.dge, design)
-# run quasi-likelihood F-test on counts.dge; on the last column of model.matrix or your custom contrast (check model colnames for contrast names)
+# run quasi-likelihood F-test on counts.dge; on the last column of model.matrix or your custom contrast (check model colnames for contrast names) with makeContrasts
 counts.glm <- glmQLFTest(counts.dge)
 # impose lfc threshold on DEG list
 counts.glm.lfc <- glmTreat(counts.dge, lfc = lfc.thres)
